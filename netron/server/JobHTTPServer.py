@@ -1,9 +1,11 @@
 from netron.server import JobManager
 from netron.solvers import GridSearch
+from netron.server import TrainStats
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.web import Application, RequestHandler
 import json
+import os
 
 class MainRequestHandler(RequestHandler):
     def get(self):
@@ -25,19 +27,26 @@ class JobHandler(RequestHandler):
         else:
             self.finish("error: no data")
 
-class ResultsHandler(RequestHandler):
+class StatsHandler(RequestHandler):
+    def initialize(self):
+        self.stats = TrainStats()
+
     def get(self):
-        self.write("Stat page with the results of training")
+        self.render("index.html", **self.stats.get_stats())
 
 class JobHTTPServer(object):
     def __init__(self, port, job_manager):
         self.job_manager = job_manager
 
-        self.routes = Application([
+        self.routes = Application(
+        [
             (r"/", MainRequestHandler),
             (r"/worker/(.*)/job", JobHandler, {"job_manager": job_manager}),
-            (r"/results", ResultsHandler)
-        ])
+            (r"/stats", StatsHandler)
+            ],
+        template_path=os.path.join(os.path.dirname(__file__), "templates"),
+        static_path=os.path.join(os.path.dirname(__file__), "static")
+        )
 
         self.port = port
 
