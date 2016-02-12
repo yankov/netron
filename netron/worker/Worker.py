@@ -1,11 +1,11 @@
-from netron.worker import NNModel
-import tornado
+from netron.worker import NNModel import tornado
 from tornado.httpclient import HTTPClient, AsyncHTTPClient
 from tornado.httpclient import HTTPError
 from tornado.ioloop import IOLoop
 from tornado import gen
 import socket
 import json
+import numpy as np
 
 class Worker(object):
     # Time before retrying a request to server in seconds
@@ -24,18 +24,22 @@ class Worker(object):
     def get_new_job(self):
         try:
             response = yield self.http_client.fetch(self.url + "/worker/" + self.name + "/job")
-            task = tornado.escape.json_decode(response.body)
 
-            #if task["model_type"] == "neural_net":
-            #    if "neural_net" not in self.models:
-            #        self.models["neural_net"] = NNModel()
-            #    result = self.models["neural_net"].load_task(task["parameters"])
+            # Why the hell I have to decode it 2 times? If I don't, after first decode it's
+            # still a string.
+            task = json.loads(tornado.escape.json_decode(response.body.decode('utf-8')))
 
-            result = self.models["neural_net"].load_task(task)
-            # TODO: Store the results possibly here
+            if task["model_type"] == "neural_net":
+                if "neural_net" not in self.models:
+                    self.models["neural_net"] = NNModel()
 
-            # Get a new job from server
-            IOLoop.current().call_later(1, lambda: self.get_new_job())
+                x_train = np.random.rand(10000, 1) * 20 - 10
+                result = self.models["neural_net"].load_task(task["model"], x_train, np.sin(x_train))
+
+                # TODO: Store the results possibly here
+
+                # Get a new job from server
+                IOLoop.current().call_later(1, lambda: self.get_new_job())
 
         except HTTPError as e:
             print("Error: " + str(e))
