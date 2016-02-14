@@ -1,3 +1,3 @@
 from .Solver import *
-from .GridSearch import *
+from .DummySearch import *
 

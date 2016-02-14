@@ -7,7 +7,7 @@ class NNModel(object):
         self.model = None
         self.data = None
 
-    def run_task(self, model_json, x_train, y_train):
+    def run_job(self, model_json, x_train, y_train):
         print "Loading model..."
         self.model = model_from_json(model_json)
         print "Training"

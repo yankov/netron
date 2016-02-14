@@ -47,14 +47,14 @@ class Worker(object):
 
             # Why the hell I have to decode it 2 times? If I don't, after first decode it's
             # still a string.
-            task = json.loads(tornado.escape.json_decode(response.body.decode('utf-8')))
-            x_train, y_train = yield self.load_data(task["data"], task["refresh_data"])
+            job = json.loads(tornado.escape.json_decode(response.body.decode('utf-8')))
+            x_train, y_train = yield self.load_data(job["data_filename"], job["refresh_data"])
 
-            if task["model_type"] == "neural_net":
+            if job["model_type"] == "neural_net":
                 if "neural_net" not in self.models:
                     self.models["neural_net"] = NNModel()
 
-                result = self.models["neural_net"].run_task(task["model"], x_train, y_train)
+                result = self.models["neural_net"].run_job(job["model_params"], x_train, y_train)
 
                 # TODO: Store the results possibly here
 

@@ -1,5 +1,5 @@
 from netron.server import JobManager
-from netron.solvers import GridSearch
+from netron.solvers import DummySearch
 from netron.server import TrainStats
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
@@ -59,6 +59,6 @@ class JobHTTPServer(object):
 
 # Example
 if __name__ == "__main__":
-    job_manager = JobManager(solver = GridSearch())
+    job_manager = JobManager(solver = DummySearch("neural_net", "sin_data.npz"))
     server = JobHTTPServer(8080, job_manager)
     server.start()
