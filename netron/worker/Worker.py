@@ -54,7 +54,7 @@ class Worker(object):
                 if "neural_net" not in self.models:
                     self.models["neural_net"] = NNModel()
 
-                result = self.models["neural_net"].load_task(task["model"], x_train, y_train)
+                result = self.models["neural_net"].run_task(task["model"], x_train, y_train)
 
                 # TODO: Store the results possibly here
 
