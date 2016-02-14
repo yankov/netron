@@ -28,7 +28,7 @@ Isolating netron clusters from other running intances is in TODO.
 
 ## Creating training data for workers
 Training data must be stored as a compressed numpy file in
-`server/static/data/`. To create such file for your training data:  
+`netron/server/static/`. To create such file for your training data:  
 ```python
 np.savez_compressed("data_filename.npz", x_train = your_x_train, y_train = your_y_train)
 ```
