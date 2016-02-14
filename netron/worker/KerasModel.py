@@ -2,7 +2,7 @@ from keras.models import Sequential
 from keras.layers.core import Dense, Activation, Dropout
 from keras.models import model_from_json
 
-class NNModel(object):
+class KerasModel(object):
     def __init__(self):
         self.model = None
         self.data = None
