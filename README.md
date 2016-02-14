@@ -1,5 +1,5 @@
 # netron
-Smart and distributed (hyper)parameter search for Neural nets and other models.
+Smart and distributed hyperparameter/architecture search for Neural nets and other models.
 
 ## !! WARNING !!
 If you are going to play with creating your own clusters it is highly encouraged
@@ -9,13 +9,15 @@ Isolating netron clusters from other running intances is in TODO.
 
 ## TODO
 1. Isolate netron clusters from other instances.  
-2. JobRunner for a cluster.  
-3. JobReporter. How to store the progress of training? How to display the progress? Separate dashboard?  
-4. Plugins for model evolution:  
-    4.1 Simple GridSearch  
-    4.2 NEAT  
-    4.3 QLearning?  
-    4.4 ...  
+2. JobReporter. How to store the progress of training? How to display the progress? Separate dashboard?  
+3. Plugins for model evolution:  
+    * GridSearch  
+    * RandomSearch  
+    * NEAT/HyperNEAT  
+    * Bayesian Optimization  
+    * Reversible learning  
+    * QLearning?  
+    * ...  
 
 ## Installation
 1. Install python dependencies: `sudo pip install -r requirements.txt`  
