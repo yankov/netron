@@ -7,7 +7,7 @@ class GridSearch(Solver):
     def get_new_job(self, worker_id):
         with open(os.path.dirname(os.path.abspath(__file__)) + "/model_example.json") as f:
             model = f.read()
-        job = {"model_type": "neural_net", "model": model}
+        job = {"model_type": "neural_net", "model": model, "refresh_data": False, "data": "sin_data.npz"}
         return tornado.escape.json_encode(job)
 
 

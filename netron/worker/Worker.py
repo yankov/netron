@@ -1,8 +1,10 @@
-from netron.worker import NNModel import tornado
+from netron.worker import NNModel
+import tornado
 from tornado.httpclient import HTTPClient, AsyncHTTPClient
 from tornado.httpclient import HTTPError
 from tornado.ioloop import IOLoop
 from tornado import gen
+import os
 import socket
 import json
 import numpy as np
@@ -19,6 +21,24 @@ class Worker(object):
         self.status = "idle"
         self.http_client = AsyncHTTPClient()
         self.models = {"neural_net": NNModel()}
+        self.data_files = {}
+        self.data_path = os.path.join(os.path.dirname(__file__), "data")
+
+    @gen.coroutine
+    def load_data(self, filename, refresh):
+        if filename in self.data_files and not refresh:
+            raise gen.Return(self.data_files[filename])
+
+        print "Getting data from the server"
+        result = yield self.http_client.fetch(self.url + "/data/" + filename)
+        data_file = os.path.join(self.data_path, filename)
+        with open(data_file, "w") as f:
+            f.write(result.body)
+        data = np.load(data_file)
+        self.data_files[filename] = [data["x_train"], data["y_train"]]
+
+        raise gen.Return(self.data_files[filename])
+
 
     @gen.coroutine
     def get_new_job(self):
@@ -28,13 +48,13 @@ class Worker(object):
             # Why the hell I have to decode it 2 times? If I don't, after first decode it's
             # still a string.
             task = json.loads(tornado.escape.json_decode(response.body.decode('utf-8')))
+            x_train, y_train = yield self.load_data(task["data"], task["refresh_data"])
 
             if task["model_type"] == "neural_net":
                 if "neural_net" not in self.models:
                     self.models["neural_net"] = NNModel()
 
-                x_train = np.random.rand(10000, 1) * 20 - 10
-                result = self.models["neural_net"].load_task(task["model"], x_train, np.sin(x_train))
+                result = self.models["neural_net"].load_task(task["model"], x_train, y_train)
 
                 # TODO: Store the results possibly here
 

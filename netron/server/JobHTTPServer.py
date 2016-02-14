@@ -4,6 +4,7 @@ from netron.server import TrainStats
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.web import Application, RequestHandler
+import tornado
 import json
 import os
 
@@ -37,16 +38,17 @@ class StatsHandler(RequestHandler):
 class JobHTTPServer(object):
     def __init__(self, port, job_manager):
         self.job_manager = job_manager
+        self.static_path = os.path.join(os.path.dirname(__file__), "static")
 
         self.routes = Application(
         [
             (r"/", MainRequestHandler),
             (r"/worker/(.*)/job", JobHandler, {"job_manager": job_manager}),
-            (r"/stats", StatsHandler)
+            (r"/stats", StatsHandler),
+            (r"/data/(.*)", tornado.web.StaticFileHandler, {'path': self.static_path})
             ],
         template_path=os.path.join(os.path.dirname(__file__), "templates"),
-        static_path=os.path.join(os.path.dirname(__file__), "static")
-        )
+        static_path= self.static_path)
 
         self.port = port
 
