@@ -9,6 +9,7 @@ class KerasModel(object):
 
     def run_job(self, model_json, x_train, y_train):
         print "Loading model..."
+        print model_json
         self.model = model_from_json(model_json)
         print "Training"
         res = self.model.fit(x_train, y_train, nb_epoch=2)

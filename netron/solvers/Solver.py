@@ -22,3 +22,8 @@ class Solver(object):
 
     def create_job(self, model_params, refresh_data = False):
         return Job(self.experiment_id, self.model_type, model_params, self.data_filename, refresh_data)
+
+    def get_new_job(self, worker_id):
+        job = self.create_job(next(self.models))
+        return job.to_json()
+

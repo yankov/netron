@@ -56,7 +56,7 @@ class Worker(object):
                 raise ValueError("Only the following models are supported right now: " + ", ".join(self.models.keys()))
 
             x_train, y_train = yield self.load_data(job["data_filename"], job["refresh_data"])
-            result = self.models[job["model_type"]].run_job(job["model_params"], x_train, y_train)
+            result = self.models[job["model_type"]].run_job(json.dumps(job["model_params"]), x_train, y_train)
             self.save_result(job["experiment_id"], result)
 
             # Get a new job from server
