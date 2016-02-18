@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from netron.worker import KerasModel
 import tornado
 from tornado.httpclient import HTTPClient, AsyncHTTPClient
@@ -12,20 +13,32 @@ import json
 import datetime
 
 class Worker(object):
-    # Time before retrying a request to server in seconds
+    # Seconds before retrying a request to server in seconds
     POLL_INTERVAL = 10
 
-    def __init__(self, api_url, mongo_server, mongo_port = 27017):
+    # Seconds to wait when there are no new jobs
+    NO_JOB_WAIT= 60
+
+    def __init__(self, api_url, mongo_server, mongo_port = 27017, **kwargs):
         self.url = api_url
         self.name = socket.gethostname()
         self.status = "idle"
         self.http_client = AsyncHTTPClient()
-        self.models = {"keras": KerasModel()}
+        self.models = {"keras": KerasModel(**kwargs)}
         self.data_files = {}
         self.data_path = os.path.join(os.path.dirname(__file__), "data")
         self.mongo_client = MongoClient(mongo_server, mongo_port)
         self.db = self.mongo_client['netron']
         self.experiments_col = self.db["experiments"]
+        self.start_time = datetime.datetime.now()
+
+    def json_decode(self, body):
+        json_body = json.loads(body.decode("utf-8"))
+        # This needs to be called two times on escaped json string. ¯\_(ツ)_/¯
+        if not isinstance(json_body, dict):
+            return json.loads(json_body)
+
+        return json_body
 
     @gen.coroutine
     def load_data(self, filename, refresh):
@@ -47,15 +60,22 @@ class Worker(object):
     def get_new_job(self):
         try:
             response = yield self.http_client.fetch(self.url + "/worker/" + self.name + "/job")
+            job = self.json_decode(response.body)
 
-            # Why the hell I have to decode it 2 times? If I don't, after first decode it's
-            # still a string.
-            job = json.loads(tornado.escape.json_decode(response.body.decode('utf-8')))
+            # no jobs, wait 1 min before next request.
+            if "wait" in job:
+                print "Experiment %s is done! There are no new jobs yet." % job["experiment_id"]
+                IOLoop.current().call_later(self.NO_JOB_WAIT, lambda: self.get_new_job())
+                return
 
+            # if job type is unsupported (only keras supported at the moment)
             if job["model_type"] not in self.models:
                 raise ValueError("Only the following models are supported right now: " + ", ".join(self.models.keys()))
 
+            # load data from a numpy archive with a given name
             x_train, y_train = yield self.load_data(job["data_filename"], job["refresh_data"])
+
+            # train the model
             result = self.models[job["model_type"]].run_job(json.dumps(job["model_params"]), x_train, y_train)
             self.save_result(job["experiment_id"], result)
 
@@ -84,6 +104,6 @@ class Worker(object):
 
 
 if __name__ == "__main__":
-    worker = Worker("http://localhost:8080", mongo_server = "localhost", mongo_port = 27017)
+    worker = Worker("http://localhost:8080", mongo_server = "localhost", mongo_port = 27017, nb_epoch = 10, patience = 5)
     worker.get_new_job()
     IOLoop.current().start()
