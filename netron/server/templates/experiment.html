@@ -7,22 +7,24 @@
     <!-- Bootstrap -->
     <link href="{{ static_url("css/bootstrap.min.css") }}" rel="stylesheet" media="screen">
     <link rel="stylesheet" href="{{ static_url("stats.css") }}" type="text/css">
-    <title>Netron: all experiments</title>
+    <title>Netron: {{experiment_id}}</title>
   </head>
   <body>
     <div class="container">
-      <h2>Experiments</h2>
-      <p><b>Total: {{len(experiments)}}</b></p>
+      <h2>Experiment {{experiment_id}}</h2>
+      <p><b>Total results: {{count}}. <i>Started at {{models[0]["created_at"]}}</i></b>.</p>
 
       <div class="row">
-        <div class="span6 text-center"><b>ID</b></div>
-        <div class="span4 text-center"><b>Date</b></div>
+        <div class="span2 text-center"><b>Min loss</b></div>
+        <div class="span2 text-center"><b>Mean loss</b></div>
+        <div class="span8 text-center"><b>Model</b></div>
       </div>
 
-      {% for exp in experiments %}
+      {% for model in models %}
         <div class="row">
-          <div class="span6 text-center"><a href="/stats/{{exp["experiment_id"]}}">{{exp["experiment_id"]}}</a></div>
-          <div class="span4 text-center">{{exp["created_at"]}}</div>
+          <div class="span2 text-center">{{min(model["loss"])}}</div>
+          <div class="span2 text-center">{{np.mean(model["loss"])}}</div>
+          <div class="span8"><textarea onclick="this.focus();this.select()" rows="5" class="span8">{{model["model_params"]}}</textarea></div>
         </div>
       {% end %}
     </div>

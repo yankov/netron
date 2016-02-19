@@ -32,8 +32,11 @@ class StatsHandler(RequestHandler):
     def initialize(self):
         self.stats = TrainStats()
 
-    def get(self):
-        self.render("index.html", **self.stats.get_stats())
+    def get(self, experiment_id = None):
+        if not experiment_id:
+            self.render("index.html", **self.stats.get_all_experiments())
+        else:
+            self.render("experiment.html", **self.stats.get_stats(experiment_id))
 
 class JobHTTPServer(object):
     def __init__(self, port, job_manager):
@@ -45,6 +48,7 @@ class JobHTTPServer(object):
             (r"/", MainRequestHandler),
             (r"/worker/(.*)/job", JobHandler, {"job_manager": job_manager}),
             (r"/stats", StatsHandler),
+            (r"/stats/(.*)", StatsHandler),
             (r"/data/(.*)", tornado.web.StaticFileHandler, {'path': self.static_path})
             ],
         template_path=os.path.join(os.path.dirname(__file__), "templates"),
@@ -59,6 +63,7 @@ class JobHTTPServer(object):
 
 # Example
 if __name__ == "__main__":
-    job_manager = JobManager(solver = RandomSearch(simple_params_grid, 1, 1, 10, "keras", "sin_data.npz"))
+    #job_manager = JobManager(solver = RandomSearch(simple_params_grid, 1, 1, 10, "keras", "sin_data.npz"))
+    job_manager = JobManager(solver = GridSearch(simple_params_grid, 1, 1, "keras", "sin_data.npz"))
     server = JobHTTPServer(8080, job_manager)
     server.start()
