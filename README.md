@@ -25,8 +25,12 @@ Isolating netron clusters from other running intances is in TODO.
 3. Start a vagrant box: `vagrant up`. It will start up a virtual machine with a MongoDB running inside of a docker container.
 
 ## How to run
-1. Start a server: `python netron/server/JobHTTPServer.py`  
-2. Start a worker: `python netron/worker/Worker.py`  
+This will find a network to model `sin(x)`. 
+1. Start a server: `python server.py --input_dim 1 --output_dim 1 --data sin_data.npz --solver GridSearch --grid simple_params_grid.json`  
+2. Start a worker: `python worker.py  --server http://localhost:8080 --nb_epoch 10 --patience 5`  
+
+Check `python server.py -h` and `python worker.py -h` for the explanation of the arguments.  
+You can check the results of the training by opening `http://localhost:8080/` in your browser.
 
 ## Creating training data for workers
 Training data must be stored as a compressed numpy file in

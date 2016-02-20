@@ -63,7 +63,7 @@ class JobHTTPServer(object):
 
 # Example
 if __name__ == "__main__":
-    #job_manager = JobManager(solver = RandomSearch(simple_params_grid, 1, 1, 10, "keras", "sin_data.npz"))
-    job_manager = JobManager(solver = GridSearch(simple_params_grid, 1, 1, "keras", "sin_data.npz"))
+    job_manager = JobManager(solver = RandomSearch(simple_params_grid, 1, 1, 10, "keras", "mnist_train.npz"))
+    #job_manager = JobManager(solver = GridSearch(simple_params_grid, 1, 1, "keras", "sin_data.npz"))
     server = JobHTTPServer(8080, job_manager)
     server.start()

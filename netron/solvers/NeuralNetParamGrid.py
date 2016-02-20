@@ -9,7 +9,8 @@ import itertools
 
 class NeuralNetParamGrid:
     LAYERS = {
-        "Dense": Dense(1).get_config()
+        "Dense": Dense(1).get_config(),
+        "Dropout": Dropout(0).get_config()
     }
 
     OPTIMIZERS = {
