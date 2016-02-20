@@ -22,7 +22,12 @@ Isolating netron clusters from other running intances is in TODO.
 ## Installation
 1. Install python dependencies: `sudo pip install -r requirements.txt`  
 2. Install latest [VirtualBox](https://www.virtualbox.org/wiki/Downloads) and [vagrant](https://www.vagrantup.com/downloads.html).  
-3. Start a vagrant box: `vagrant up`. It will start up a virtual machine with a MongoDB running inside of a docker container.
+3. Start a vagrant box: `vagrant up`. It will start up a virtual machine with a MongoDB running inside of a docker container.  
+
+If you are running on a Linux server, you don't need vagrant and Virtual Machine and can simply start Mongo in a docker container:  
+1. `docker pull mongo`  
+2. `docker run -p 27017:27017 --name netron-mongo -d mongo`  
+And then to stop docker container `docker stop netron-mongo` and to start `docker start netron-mongo`.
 
 ## How to run
 This will find a network to model `sin(x)`.  
