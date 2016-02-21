@@ -17,16 +17,13 @@ args = parser.parse_args()
 
 input_shape = [int(dim) for dim in args.input_shape.split(",")]
 
-with open(args.grid) as f:
-    params_grid = json.loads(f.read())
-
 if args.solver == "GridSearch":
-   solver = GridSearch(params_grid, input_shape, args.output_dim, "keras", args.data)
+   solver = GridSearch(args.grid, input_shape, args.output_dim, "keras", args.data)
 elif args.solver == "RandomSearch":
     if not args.params_sample_size or not args.structure_sample_size:
         raise ValueError("--params_sample_size  and --structure_sample_size must be used with RandomSearch")
-    solver = RandomSearch(params_grid, input_shape, args.output_dim, args.params_sample_size,
-                          args.structure_sample_size, "keras", args.data)
+    solver = RandomSearch(args.grid, input_shape, args.output_dim, "keras", args.data, args.params_sample_size,
+                          args.structure_sample_size)
 else:
     raise ValueError("This solver is not supported. Only possible values for --solver right now are GridSearch or RandomSearch")
 

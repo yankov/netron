@@ -32,7 +32,7 @@ And then to stop docker container `docker stop netron-mongo` and to start `docke
 ## How to run
 This will find a network to model `sin(x)`.  
   
-1. Start a server: `python server.py --input_dim 1 --output_dim 1 --data sin_data.npz --solver GridSearch --grid simple_params_grid.json`  
+1. Start a server: `python server.py --input_shape 1 --output_dim 1 --data sin_data.npz --solver GridSearch --grid simple_params_grid.json`  
 2. Start a worker: `python worker.py  --server http://localhost:8080 --nb_epoch 10 --patience 5`  
 
 Check `python server.py -h` and `python worker.py -h` for the explanation of the arguments.  

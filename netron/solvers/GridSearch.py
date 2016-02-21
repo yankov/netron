@@ -4,11 +4,6 @@ from sklearn.grid_search import ParameterGrid
 import itertools
 
 class GridSearch(Solver):
-    def __init__(self, params_grid, input_shape, output_dim, model_type, data_filename):
-        self.model_factory = self.get_model_factory(model_type)
-        self.grid = NeuralNetGrid(params_grid, self.model_factory)
-        self.models = self.generate_models(input_shape, output_dim)
-        super(GridSearch, self).__init__(model_type, data_filename)
 
     def create_network_structures(self, layers, layers_num, input_shape):
         """Returns all combinations of given set of layers with given set of sizes"""
@@ -35,7 +30,9 @@ class GridSearch(Solver):
 
 # Example.
 if __name__ == "__main__":
-    job_stream = GridSearch(simple_params_grid, 1, 1, "keras", "sin_data.npz")
+    import sys
+
+    job_stream = GridSearch(sys.argv[1], [1], 1, "keras", "sin_data.npz")
     for i in range(5):
         print "Model #" + str(i)
         print "=" * 10

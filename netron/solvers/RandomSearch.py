@@ -9,17 +9,10 @@ class RandomSearch(Solver):
     # consecutively, then skip to the next network size
     STRUCT_DUP_THRESHOLD = 100
 
-    def __init__(self, params_grid, input_shape, output_dim, params_sample_size,
-                 structure_sample_size, model_type, data_filename):
-        self.input_shape = input_shape
-        self.output_dim = output_dim
+    def initialize(self, params_sample_size, structure_sample_size):
         self.params_sample_size = params_sample_size
         self.structure_sample_size = structure_sample_size
-        self.model_factory = self.get_model_factory(model_type)
-        self.grid = NeuralNetGrid(params_grid, self.model_factory)
-        self.models = self.generate_models(input_shape, output_dim)
         self.seen_structures = set()
-        super(RandomSearch, self).__init__(model_type, data_filename)
 
     def random_product(self, *args, **kwds):
         "Random selection from itertools.product(*args, **kwds)"
@@ -67,7 +60,9 @@ class RandomSearch(Solver):
 
 # Example.
 if __name__ == "__main__":
-    job_stream = RandomSearch(simple_params_grid, 1, 1, 2, "keras", "sin_data.npz")
+    import sys
+
+    job_stream = RandomSearch(sys.argv[1], [1, 28, 28], 10, "keras", "sin_data.npz", 1, 5)
     for i in range(5):
         print "Model #" + str(i)
         print "=" * 10
