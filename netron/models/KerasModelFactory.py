@@ -94,6 +94,8 @@ class KerasModelFactory:
                         j -= 1
                     elif self.LAYERS[layers[j]]["output_ndim"] != layer_conf["input_ndim"]:
                         return False
+                    else:
+                        break
             # Skip, if current layer input ndim doesn't match previous layer output ndim.
             elif layer_conf["input_ndim"] != -1 and (prev_layer_conf["output_ndim"] != layer_conf["input_ndim"]):
                 return False
