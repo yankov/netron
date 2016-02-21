@@ -14,12 +14,25 @@ class KerasModel(object):
         # How many epoch of not improving before earlystopper kicks in
         self.patience = patience
 
-    def run_job(self, model_json, x_train, y_train, nb_epoch=10):
+    def run_job(self, model_json, X_train, y_train, X_test, y_test, nb_epoch=10):
         print "Loading model..."
         self.model = model_from_json(model_json)
+        if X_test is not None and y_test is not None:
+            validation_data = (X_test, y_test)
+            monitor = "val_loss"
+        else:
+            validation_data = None
+            monitor = "loss"
+
         print "Training"
-        earlystopper = EarlyStopping(monitor='val_loss', patience=self.patience, verbose=1, mode='auto')
-        res = self.model.fit(x_train, y_train, nb_epoch=self.nb_epoch, verbose=1, callbacks=[earlystopper])
-        print "Complete!"
+        earlystopper = EarlyStopping(monitor=monitor, patience=self.patience, verbose=1, mode='auto')
+        res = self.model.fit(X_train, y_train, nb_epoch=self.nb_epoch, verbose=1,
+                             validation_data=validation_data, callbacks=[earlystopper])
+        if validation_data:
+            print "Evaluating model on a test set"
+            score = self.model.evaluate(X_test, y_test, show_accuracy=True, verbose=1)
+            print "Test score: %f\n Test accuracy: %f" % (score[0], score[1])
+            res.history["val_loss"] = score[0]
+            res.history["val_accuracy"] = score[1]
         return res
 

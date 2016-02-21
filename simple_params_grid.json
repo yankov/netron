@@ -13,5 +13,3 @@
          "momentum":[0.9],
          "name": ["SGD"],
          "nesterov":[true]}}
-
-

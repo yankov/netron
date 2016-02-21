@@ -14,7 +14,7 @@ import datetime
 
 class Worker(object):
     # Seconds before retrying a request to server in seconds
-    POLL_INTERVAL = 10
+    POLL_INTERVAL = 1
 
     # Seconds to wait when there are no new jobs
     NO_JOB_WAIT= 60
@@ -51,7 +51,13 @@ class Worker(object):
         with open(data_file, "w") as f:
             f.write(result.body)
         data = np.load(data_file)
-        self.data_files[filename] = [data["x_train"], data["y_train"]]
+        self.data_files[filename] = [data["X_train"], data["y_train"]]
+
+        # Add a test set if it's there
+        if "X_test" in data and "y_test" in data:
+            self.data_files[filename].extend([data["X_test"], data["y_test"]])
+        else:
+            self.data_files[filename].extend([None, None])
 
         raise gen.Return(self.data_files[filename])
 
@@ -73,10 +79,10 @@ class Worker(object):
                 raise ValueError("Only the following models are supported right now: " + ", ".join(self.models.keys()))
 
             # load data from a numpy archive with a given name
-            x_train, y_train = yield self.load_data(job["data_filename"], job["refresh_data"])
+            X_train, y_train, X_test, y_test = yield self.load_data(job["data_filename"], job["refresh_data"])
 
             # train the model
-            result = self.models[job["model_type"]].run_job(json.dumps(job["model_params"]), x_train, y_train)
+            result = self.models[job["model_type"]].run_job(json.dumps(job["model_params"]), X_train, y_train, X_test, y_test)
             self.save_result(job["experiment_id"], result)
 
             # Get a new job from server
@@ -95,6 +101,8 @@ class Worker(object):
         self.experiments_col.insert({
             "experiment_id": experiment_id,
             "loss": result.history["loss"],
+            "val_loss": result.history["val_loss"] if "val_loss" in result.history else None,
+            "val_accuracy": result.history["val_accuracy"] if "val_accuracy" in result.history else None,
             "params": result.params,
             "model_params": json.loads(result.model.to_json()),
             "created_at": datetime.datetime.utcnow()})

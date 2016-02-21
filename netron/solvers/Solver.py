@@ -1,6 +1,7 @@
 import tornado
 import json
 import uuid
+from netron.solvers import KerasModelFactory
 
 class Job:
     def __init__(self, experiment_id, model_type, model_params, data_filename, refresh_data = False):
@@ -30,3 +31,8 @@ class Solver(object):
         except StopIteration:
             return '{"wait":"True", "experiment_id": "%s"}' % self.experiment_id
 
+    def get_model_factory(self, model_type):
+        if model_type == "keras":
+            return KerasModelFactory()
+        else:
+            raise ValueError("%s is not supported. Only Keras models are supported right now." % model_type)

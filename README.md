@@ -42,7 +42,7 @@ You can check the results of the training by opening `http://localhost:8080/stat
 Training data must be stored as a compressed numpy file in
 `netron/server/static/`. To create such file for your training data:  
 ```python
-np.savez_compressed("data_filename.npz", x_train = your_x_train, y_train = your_y_train)
+np.savez_compressed("data_filename.npz", X_train = your_x_train, y_train = your_y_train)
 ```
 
 Where `your_x_train` and `your_y_train` are numpy arrays.

@@ -16,14 +16,14 @@
 
       <div class="row">
         <div class="span2 text-center"><b>Min loss</b></div>
-        <div class="span2 text-center"><b>Mean loss</b></div>
+        <div class="span2 text-center"><b>Val loss</b></div>
         <div class="span8 text-center"><b>Model</b></div>
       </div>
 
       {% for model in models %}
         <div class="row">
-          <div class="span2 text-center">{{min(model["loss"])}}</div>
-          <div class="span2 text-center">{{np.mean(model["loss"])}}</div>
+          <div class="span2 text-center">{{model["min_loss"]}}</div>
+          <div class="span2 text-center">{{model["val_loss"]}}</div>
           <div class="span8"><textarea onclick="this.focus();this.select()" rows="5" class="span8">{{model["model_params"]}}</textarea></div>
         </div>
       {% end %}

@@ -1,0 +1,20 @@
+{"model": ["Sequential"],
+ "layers": ["Convolution2D","MaxPooling2D", "Flatten", "Dense", "Dropout"],
+ "layer_nums": [6],
+ "optimizers": ["Adadelta"],
+ "loss": ["categorical_crossentropy"],
+ "layer_params":
+    {"output_dim": [32, 64, 128, 256, 512],
+     "activation": ["linear", "relu", "softmax"],
+     "p":[0.25, 0.5],
+     "nb_filter":[32],
+     "nb_col":[3],
+     "nb_row":[3],
+     "pool_size":[[2,2]]
+    },
+     "optimizer_params":
+        {"decay": [1e-6], "lr": [0.1], "momentum":[0.9], "name": ["SGD"], "nesterov":[true],
+        "epsilon": [1e-06], "lr": [1.0], "name": ["Adadelta"], "rho": [0.95]}
+}
+
+
