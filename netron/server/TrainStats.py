@@ -3,8 +3,8 @@ import numpy as np
 import json
 
 class TrainStats:
-    def __init__(self, mongo_server = "localhost", mongo_port = 27017):
-       self.mongo_client = pymongo.MongoClient(mongo_server, mongo_port)
+    def __init__(self, mongo_uri):
+       self.mongo_client = pymongo.MongoClient(mongo_uri)
        self.db = self.mongo_client["netron"]
        self.experiments_col = self.db["experiments"]
 

@@ -2,6 +2,7 @@
 
 import os
 from boto3.session import Session
+import base64
 
 class AWSCluster():
     AWS_CREDENTIALS_PATH = "~/.aws/credentials"
@@ -51,11 +52,19 @@ class AWSCluster():
     def live_instances_count(self, region = DEFAULT_REGION):
         return len(list(self.live_instances(region)))
 
-    def create_spot_instances(self, max_spot_price, instance_count, instance_type = "g2.2xlarge", region = DEFAULT_REGION):
+    def create_spot_instances(self, max_spot_price, instance_count, instance_type = "g2.2xlarge",
+                              region = DEFAULT_REGION, bootstrap_script = "examples/bootstrap_worker.sh"):
+        with open(bootstrap_script) as f:
+            script = base64.b64encode(f.read())
+
         specs = {
             'ImageId': self.get_ami_id(self.AMI_NAME, region),
             'KeyName': self.key_name,
-            'SecurityGroups': ["default"],
+            'SecurityGroups': ["netron-workers"],
+            'UserData': script,
+            'IamInstanceProfile': {
+                'Name': 'netronWorker'
+             },
             'InstanceType': instance_type,
         }
 

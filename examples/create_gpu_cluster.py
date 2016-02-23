@@ -6,7 +6,7 @@ import time
 cluster = AWSCluster()
 
 # Create 2 GPU instances at max price of $0.1/hr.
-cluster.create_spot_instances(max_spot_price = 0.1, instance_count = 2)
+cluster.create_spot_instances(max_spot_price = 0.1, instance_count = 1, bootstrap_script = "examples/bootstrap_worker.sh")
 req = cluster.describe_spot_requests()
 
 while "open" in req:
@@ -21,7 +21,7 @@ print "Terminating ... "
 cluster.cancel_all_spot_requests()
 
 # Terminate instances
-cluster.terminate_all_instances()
+#cluster.terminate_all_instances()
 
 # If script fails before this line, make sure there are no un-terminated instances left.
 print "Ok!"

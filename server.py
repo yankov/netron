@@ -13,6 +13,7 @@ parser.add_argument('--grid', required=True, help="A json file with a parameter 
 parser.add_argument('--port', type=int, default=8080, required=False, help="A port server should be listening on. Default is 8080.")
 parser.add_argument('--params_sample_size', type=int, required=False, help="Only for RandomSearch: parameter sample size per network structure.")
 parser.add_argument('--structure_sample_size', type=int, required=False, help="Only for RandomSearch: network structure sample size per given number of layers.")
+parser.add_argument('--mongo_uri', required=False, default="mongodb://localhost:27017/", help="MongoDB connection string URI.")
 args = parser.parse_args()
 
 input_shape = [int(dim) for dim in args.input_shape.split(",")]
@@ -31,5 +32,5 @@ else:
 job_manager = JobManager(solver)
 print "Started a server with %s solver and %s dataset" % (args.solver, args.data)
 
-server = JobHTTPServer(args.port, job_manager)
+server = JobHTTPServer(args.port, job_manager, args.mongo_uri)
 server.start()

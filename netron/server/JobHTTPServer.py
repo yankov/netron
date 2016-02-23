@@ -29,8 +29,8 @@ class JobHandler(RequestHandler):
             self.finish("error: no data")
 
 class StatsHandler(RequestHandler):
-    def initialize(self):
-        self.stats = TrainStats()
+    def initialize(self, mongo_uri):
+        self.stats = TrainStats(mongo_uri)
 
     def get(self, experiment_id = None):
         if not experiment_id:
@@ -39,16 +39,17 @@ class StatsHandler(RequestHandler):
             self.render("experiment.html", **self.stats.get_stats(experiment_id))
 
 class JobHTTPServer(object):
-    def __init__(self, port, job_manager):
+    def __init__(self, port, job_manager, mongo_uri):
         self.job_manager = job_manager
+        self.mongo_uri = mongo_uri
         self.static_path = os.path.join(os.path.dirname(__file__), "static")
 
         self.routes = Application(
         [
             (r"/", MainRequestHandler),
             (r"/worker/(.*)/job", JobHandler, {"job_manager": job_manager}),
-            (r"/stats", StatsHandler),
-            (r"/stats/(.*)", StatsHandler),
+            (r"/stats", StatsHandler, {"mongo_uri": self.mongo_uri}),
+            (r"/stats/(.*)", StatsHandler, {"mongo_uri": self.mongo_uri}),
             (r"/data/(.*)", tornado.web.StaticFileHandler, {'path': self.static_path})
             ],
         template_path=os.path.join(os.path.dirname(__file__), "templates"),

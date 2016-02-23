@@ -19,7 +19,7 @@ class Worker(object):
     # Seconds to wait when there are no new jobs
     NO_JOB_WAIT= 60
 
-    def __init__(self, api_url, mongo_server, mongo_port = 27017, **kwargs):
+    def __init__(self, api_url, mongo_uri, mongo_port = 27017, **kwargs):
         self.url = api_url
         self.name = socket.gethostname()
         self.status = "idle"
@@ -27,7 +27,7 @@ class Worker(object):
         self.models = {"keras": KerasModel(**kwargs)}
         self.data_files = {}
         self.data_path = os.path.join(os.path.dirname(__file__), "data")
-        self.mongo_client = MongoClient(mongo_server, mongo_port)
+        self.mongo_client = MongoClient(mongo_uri)
         self.db = self.mongo_client['netron']
         self.experiments_col = self.db["experiments"]
         self.start_time = datetime.datetime.now()
@@ -112,6 +112,6 @@ class Worker(object):
 
 
 if __name__ == "__main__":
-    worker = Worker("http://localhost:8080", mongo_server = "localhost", mongo_port = 27017, nb_epoch = 10, patience = 5)
+    worker = Worker("http://localhost:8080", mongo_uri = "mongodb://localhost:27017/", nb_epoch = 10, patience = 5)
     worker.get_new_job()
     IOLoop.current().start()
