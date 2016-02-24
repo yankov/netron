@@ -7,7 +7,7 @@ import base64
 class AWSCluster():
     AWS_CREDENTIALS_PATH = "~/.aws/credentials"
     DEFAULT_REGION = "us-east-1"
-    AMI_NAME = "neuro_worker"
+    AMI_NAME = "netron_worker"
     KEY_NAME = "neuro_keys"
 
     def __init__(self, aws_credentials_path = AWS_CREDENTIALS_PATH,
@@ -65,6 +65,17 @@ class AWSCluster():
             'IamInstanceProfile': {
                 'Name': 'netronWorker'
              },
+            'BlockDeviceMappings': [
+                {
+                    #'VirtualName': 'string',
+                    'DeviceName': '/dev/sda1',
+                    'Ebs': {
+                        'VolumeSize': 20,
+                        'DeleteOnTermination': True,
+                        'VolumeType': 'gp2'
+                    }
+                },
+            ],
             'InstanceType': instance_type,
         }
 

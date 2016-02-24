@@ -11,6 +11,7 @@ import os
 import socket
 import json
 import datetime
+import boto3
 
 class Worker(object):
     # Seconds before retrying a request to server in seconds
@@ -41,16 +42,40 @@ class Worker(object):
         return json_body
 
     @gen.coroutine
-    def load_data(self, filename, refresh):
-        if filename in self.data_files and not refresh:
-            raise gen.Return(self.data_files[filename])
-
-        print "Getting data from the server"
+    def download_file_from_server(self, filename):
         result = yield self.http_client.fetch(self.url + "/data/" + filename)
         data_file = os.path.join(self.data_path, filename)
         with open(data_file, "w") as f:
             f.write(result.body)
         data = np.load(data_file)
+        raise gen.Return(data)
+
+    def download_file_from_s3(self, filename, refresh):
+        path = filename.split("//")[1].split("/")
+        bucket = path[0]
+        filename = "/".join(path[1:])
+        data_file = os.path.join(self.data_path, filename.split("/")[-1])
+        if os.path.isfile(data_file) and not refresh:
+            return np.load(data_file)
+
+        key = boto3.resource('s3').Object(bucket, filename).get()
+        with open(data_file, "w") as f:
+            for chunk in iter(lambda: key['Body'].read(4096), b''):
+                f.write(chunk)
+
+        return np.load(data_file)
+
+    @gen.coroutine
+    def load_data(self, filename, refresh):
+        if filename in self.data_files and not refresh:
+            raise gen.Return(self.data_files[filename])
+
+        print "Getting data from the server"
+        if "s3://" in filename:
+            data = self.download_file_from_s3(filename, refresh)
+        else:
+            data = yield self.download_file_from_server(filename)
+
         self.data_files[filename] = [data["X_train"], data["y_train"]]
 
         # Add a test set if it's there

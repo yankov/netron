@@ -64,3 +64,4 @@ target/
 tags
 .vagrant
 netron/worker/data
+examples/bootstrap_worker.sh
