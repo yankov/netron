@@ -3,6 +3,8 @@ from netron.grid import NeuralNetGrid
 from sklearn.grid_search import ParameterSampler, ParameterGrid
 import random
 import itertools
+import hashlib
+import time
 
 class RandomSearch(Solver):
     # If we sample more than this number of already seen networks
@@ -21,14 +23,16 @@ class RandomSearch(Solver):
 
     def create_network_structures(self, layers, layers_num, input_shape):
         """Returns all combinations of given set of layers with given set of sizes"""
+
+        start_time = time.time()
         for i in layers_num:
             j = 0
             dups = 0
             while j < self.structure_sample_size:
                 net_struct = self.random_product(layers, repeat=i)
                 fixed_net_struct = self.model_factory.fix_or_skip(net_struct, input_shape)
-                struct_hash = hash(fixed_net_struct)
                 if fixed_net_struct:
+                    struct_hash = hashlib.md5("".join(fixed_net_struct))
                     if struct_hash not in self.seen_structures:
                         self.seen_structures.add(struct_hash)
                         j += 1
@@ -43,6 +47,8 @@ class RandomSearch(Solver):
                 else:
                     #print "skipping invalid structure: %s" % "->".join(net_struct)
                     continue
+
+        print "Done in %d minutes!" % (time.time() - start_time) / 60
 
     def generate_models(self, input_shape, output_dim):
         loss_type = self.grid.params_grid["loss"][0]
@@ -62,8 +68,13 @@ class RandomSearch(Solver):
 if __name__ == "__main__":
     import sys
 
-    job_stream = RandomSearch(sys.argv[1], [1, 28, 28], 10, "keras", "sin_data.npz", 1, 5)
-    for i in range(5):
-        print "Model #" + str(i)
-        print "=" * 10
-        print job_stream.get_new_job(worker_id = 1)
+    _, grid, layer_sample_num, param_sample_num = sys.argv
+    job_stream = RandomSearch(grid, [1, 28, 28], 10, "keras", "sin_data.npz", int(param_sample_num), int(layer_sample_num))
+    job = ""
+    n = 0
+    while "wait" not in job:
+        job = job_stream.get_new_job(worker_id = 1)
+        #print job
+        n += 1
+    print "%d networks" % n
+

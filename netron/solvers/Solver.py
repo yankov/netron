@@ -3,6 +3,7 @@ import json
 import uuid
 from netron.models import KerasModelFactory
 from netron.grid import *
+from threading import Lock
 
 class Job:
     def __init__(self, experiment_id, model_type, model_params, data_filename, refresh_data = False):
@@ -28,6 +29,7 @@ class Solver(object):
         self.grid = NeuralNetGrid(self.params_grid, self.model_factory)
         self.models = self.generate_models(input_shape, output_dim)
         self.initialize(*args)
+        self.mutex = Lock()
 
     def initialize(self, *args):
         """This to be overloaded in a child class if additional logic in constructor needed"""
@@ -41,11 +43,14 @@ class Solver(object):
         return Job(self.experiment_id, self.model_type, model_params, self.data_filename, refresh_data)
 
     def get_new_job(self, worker_id):
+        self.mutex.acquire()
         try:
             job = self.create_job(next(self.models))
             return job.to_json()
         except StopIteration:
             return '{"wait":"True", "experiment_id": "%s"}' % self.experiment_id
+        finally:
+            self.mutex.release()
 
     def get_model_factory(self, model_type):
         if model_type == "keras":

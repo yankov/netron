@@ -54,7 +54,7 @@ class Worker(object):
         path = filename.split("//")[1].split("/")
         bucket = path[0]
         filename = "/".join(path[1:])
-        data_file = os.path.join(self.data_path, filename.split("/")[-1])
+        data_file = os.path.join(self.data_path, path[-1])
         if os.path.isfile(data_file) and not refresh:
             return np.load(data_file)
 

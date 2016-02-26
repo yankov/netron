@@ -63,5 +63,5 @@ target/
 *.pyc
 tags
 .vagrant
-netron/worker/data
+netron/worker/data/*.npz
 examples/bootstrap_worker.sh
