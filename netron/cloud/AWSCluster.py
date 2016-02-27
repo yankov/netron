@@ -7,7 +7,7 @@ import base64
 class AWSCluster():
     AWS_CREDENTIALS_PATH = "~/.aws/credentials"
     DEFAULT_REGION = "us-east-1"
-    AMI_NAME = "netron-worker"
+    AMI_NAME = "netron-worker-cuda7.0"
     KEY_NAME = "neuro_keys"
 
     def __init__(self, aws_credentials_path = AWS_CREDENTIALS_PATH,

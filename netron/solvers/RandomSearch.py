@@ -48,7 +48,7 @@ class RandomSearch(Solver):
                     #print "skipping invalid structure: %s" % "->".join(net_struct)
                     continue
 
-        print "Done in %d minutes!" % (time.time() - start_time) / 60
+        print "Done in %d minutes!" % ((time.time() - start_time) / 60)
 
     def generate_models(self, input_shape, output_dim):
         loss_type = self.grid.params_grid["loss"][0]

@@ -38,6 +38,14 @@ This will find a network to model `sin(x)`.
 Check `python server.py -h` and `python worker.py -h` for the explanation of the arguments.  
 You can check the results of the training by opening `http://localhost:8080/stats/` in your browser.
 
+## MNIST example
+This will find a networks for MNIST database using RandomSearch.  
+1. Start a server: `python server.py --input_shape 1,28,28 --output_dim 10 --data mnist_data.npz --solver RandomSearch --grid convnet_grid.json --params_sample_size 1 --structure_sample_size 1`  
+2. Start a worker: `python worker.py  --server http://localhost:8080 --nb_epoch 10 --patience 5`  
+
+`--structure_sample_size` specifies how many network structures to sample.  
+`--param_sample_size` specifies how many sets of parameters to sample for every network structure.  
+
 ## Creating training data for workers
 Training data must be stored as a compressed numpy file in
 `netron/server/static/`. To create such file for your training data:  
