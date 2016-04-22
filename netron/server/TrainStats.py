@@ -22,7 +22,8 @@ class TrainStats:
 
     def get_stats(self, experiment_id):
         stats = {"experiment_id": experiment_id}
-
+        if experiment_id.isdigit():
+            experiment_id = int(experiment_id)
         cur = self.experiments_col.find({"experiment_id": experiment_id})
         models = [row for row in cur]
 

@@ -3,4 +3,5 @@ from .Solver import *
 from .DummySearch import *
 from .GridSearch import *
 from .RandomSearch import *
+from .HyperOptSearch import *
 

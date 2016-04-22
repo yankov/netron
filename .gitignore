@@ -65,3 +65,5 @@ tags
 .vagrant
 netron/worker/data/*.npz
 examples/bootstrap_worker.sh
+netron/server/static/cifar10_data.npz
+

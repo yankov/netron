@@ -6,7 +6,7 @@ import time
 cluster = AWSCluster()
 
 # Create 2 GPU instances at max price of $0.1/hr.
-cluster.create_spot_instances(max_spot_price = 0.2, instance_count = 1, bootstrap_script = "examples/bootstrap_worker.sh")
+cluster.create_spot_instances(max_spot_price = 0.20, instance_count = 2, bootstrap_script = "examples/bootstrap_worker.sh")
 req = cluster.describe_spot_requests()
 
 while "open" in req:

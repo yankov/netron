@@ -10,6 +10,7 @@ class KerasModelFactory:
         "Dropout": {"config": Dropout(0).get_config(), "first_ok": False, "last_ok": False, "input_ndim":-1, "output_ndim":-1},
         "Convolution2D": {"config": Convolution2D(1,1,1).get_config(), "first_ok": True, "last_ok": False, "input_ndim":4, "output_ndim":4},
         "MaxPooling2D": {"config": MaxPooling2D().get_config(), "first_ok": False, "last_ok": False, "input_ndim":4, "output_ndim":4},
+        "ZeroPadding2D": {"config": ZeroPadding2D().get_config(), "first_ok": False, "last_ok": False, "input_ndim":4, "output_ndim":4},
         "Flatten": {"config": Flatten().get_config(), "first_ok": False, "last_ok": False, "input_ndim":-1, "output_ndim":2},
     }
 
@@ -37,25 +38,59 @@ class KerasModelFactory:
     def get_optimizer_params(self, optimizer_type):
         return self.get_optimizer_config(optimizer_type).keys()
 
+    def update_missing_params(self, model):
+        for i, layer in enumerate(model["config"]):
+            layer_conf = self.get_layer_config(layer["class_name"]).copy()
+            layer_conf.update(layer["config"])
+            model["config"][i]["config"] = layer_conf
+            # add a layer num, otherwise there'll be a name collision
+            model["config"][i]["config"]["name"] += "_" + str(i+1)
+
+        #optimizer_conf = self.get_optimizer_config(model["optimizer"]["class_name"]).copy()
+        #optimizer_conf.update(model["optimizer"])
+        #model["optimizer"] = optimizer_conf
+        return model
+
     def create_model(self, layers, nn_params, loss_type):
         model_json = json.loads(self.empty_model.to_json())
 
         for i, layer_type in enumerate(layers):
             # Default config for a layer
-            model_json["layers"].append(self.LAYERS[layer_type]["config"].copy())
+            model_json["config"].append({"class_name": layer_type, "config": self.LAYERS[layer_type]["config"].copy()})
 
             # Set values from a grid
             if i in nn_params:
                 for k in nn_params[i]:
-                    model_json["layers"][i][k] = nn_params[i][k]
+                    model_json["config"][i]["config"][k] = nn_params[i][k]
 
-        model_json["optimizer"] = nn_params["optimizer"]
+#        model_json["optimizer"] = nn_params["optimizer"]
 
         # It makes sense only to use one loss per experiment
         model_json["loss"] = loss_type
         model_json["class_mode"] = "categorical"
         return model_json
 
+    def build_from_sketch(self, model, input_shape):
+        """Build a model json from a partially filled json"""
+
+        if "config" not in model:
+            model["config"] = []
+        model["config"] = list(model["config"])
+        layers = [layer["class_name"] for layer in model["config"]]
+        print "Testing %s" % "->".join(layers)
+        layers = self.fix_or_skip(layers, input_shape)
+        if not layers:
+            print "Skipping bad structure: %s" % "->".join([layer["class_name"] for layer in model["config"]])
+            return None
+
+        for i, layer in enumerate(layers):
+            if i >= len(model["config"]):
+                model["config"].append({"class_name" : layer, "config" : self.get_layer_config(layer)})
+            elif model["config"][i]["class_name"] != layer:
+                model["config"].insert(i, {"class_name": layer, "config": self.get_layer_config(layer)})
+
+        model = self.update_missing_params(model)
+        return model
 
     def fix_or_skip(self, layers, input_shape):
         """Validates the network's structure and attempts to fix it if possible"""
